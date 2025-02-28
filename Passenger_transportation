@@ -1,0 +1,22 @@
+#include <iostream>
+
+using namespace std;
+
+int main() {
+    int passengers;
+    // Вводим количество пассажиров
+    cin >> passengers;
+    
+    // Вычисляем остаток от деления на 50 (количество пассажиров в последнем автобусе)
+    int remainder = passengers % 50;
+    
+    // Если остаток равен 0, последний автобус полон, свободных мест нет
+    // Иначе свободные места = 50 - остаток
+    if (remainder == 0) {
+        cout << 0 << endl;
+    } else {
+        cout << 50 - remainder << endl;
+    }
+    
+    return 0;
+}
