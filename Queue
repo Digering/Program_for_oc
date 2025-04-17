@@ -1,0 +1,50 @@
+#include <iostream>
+#include <vector>
+
+class Queue {
+private:
+    std::vector<int> data;
+
+public:
+    // Добавление элемента в конец очереди
+    void add(int element) {
+        data.push_back(element);
+    }
+
+    // Удаление первого элемента из очереди
+    void remove() {
+        if (!data.empty()) {
+            data.erase(data.begin());
+        }
+    }
+
+    // Вывод содержимого очереди
+    void print() {
+        for (int element : data) {
+            std::cout << element << " ";
+        }
+        std::cout << std::endl;
+    }
+};
+
+int main() {
+    Queue q;
+    
+    // Пример использования
+    q.add(10);
+    q.add(20);
+    q.add(30);
+    
+    std::cout << "Очередь после добавления элементов: ";
+    q.print();
+    
+    q.remove();
+    std::cout << "После удаления первого элемента: ";
+    q.print();
+    
+    q.add(40);
+    std::cout << "После добавления нового элемента: ";
+    q.print();
+    
+    return 0;
+}
