@@ -1,0 +1,61 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <algorithm>
+#include <string>
+
+using namespace std;
+
+struct Record {
+    string phone;
+    string rest;
+};
+
+// Функция для сравнения двух записей по номеру телефона
+bool compareRecords(const Record& a, const Record& b) {
+    return a.phone < b.phone;
+}
+
+int main() {
+    ifstream input("input.txt");
+    ofstream output("output.txt");
+
+    if (!input.is_open()) {
+        cerr << "Ошибка открытия входного файла." << endl;
+        return 1;
+    }
+
+    if (!output.is_open()) {
+        cerr << "Ошибка открытия выходного файла." << endl;
+        return 1;
+    }
+
+    vector<Record> records;
+    string line;
+
+    // Чтение и разбор каждой строки
+    while (getline(input, line)) {
+        size_t space_pos = line.find(' ');
+        if (space_pos != string::npos) {
+            string phone = line.substr(0, space_pos);
+            string rest = line.substr(space_pos + 1);
+            records.push_back({phone, rest});
+        } else {
+            // Обработка строки без пробелов (только номер)
+            records.push_back({line, ""});
+        }
+    }
+
+    // Сортировка записей по номеру телефона
+    sort(records.begin(), records.end(), compareRecords);
+
+    // Запись отсортированных данных в файл
+    for (const auto& record : records) {
+        output << record.phone << " " << record.rest << endl;
+    }
+
+    input.close();
+    output.close();
+
+    return 0;
+}
