@@ -1,0 +1,106 @@
+#include <iostream>
+#include <fstream>
+using namespace std;
+
+enum State {
+    NORMAL,
+    IN_STRING,
+    IN_CHAR,
+    IN_SINGLE_LINE_COMMENT,
+    IN_MULTI_LINE_COMMENT
+};
+
+int main() {
+    ifstream inputFile("input.c");
+    if (!inputFile.is_open()) {
+        cerr << "Unable to open input file." << endl;
+        return 1;
+    }
+
+    State state = NORMAL;
+    bool escaped = false;
+    int counter = 0;
+    char c;
+    bool error = false;
+
+    while (inputFile.get(c) && !error) {
+        switch (state) {
+            case NORMAL:
+                if (escaped) {
+                    escaped = false;
+                } else if (c == '/') {
+                    char next = inputFile.peek();
+                    if (next == '*') {
+                        inputFile.get();
+                        state = IN_MULTI_LINE_COMMENT;
+                    } else if (next == '/') {
+                        inputFile.get();
+                        state = IN_SINGLE_LINE_COMMENT;
+                    } else {
+                        if (c == '{') counter++;
+                        else if (c == '}') {
+                            if (--counter < 0) error = true;
+                        }
+                        if (c == '"') state = IN_STRING;
+                        else if (c == '\'') state = IN_CHAR;
+                        else if (c == '\\') escaped = true;
+                    }
+                } else {
+                    if (c == '{') counter++;
+                    else if (c == '}') {
+                        if (--counter < 0) error = true;
+                    }
+                    if (c == '"') state = IN_STRING;
+                    else if (c == '\'') state = IN_CHAR;
+                    else if (c == '\\') escaped = true;
+                }
+                break;
+
+            case IN_STRING:
+                if (escaped) escaped = false;
+                else if (c == '\\') escaped = true;
+                else if (c == '"') state = NORMAL;
+                break;
+
+            case IN_CHAR:
+                if (escaped) escaped = false;
+                else if (c == '\\') escaped = true;
+                else if (c == '\'') state = NORMAL;
+                break;
+
+            case IN_SINGLE_LINE_COMMENT:
+                if (c == '\n') state = NORMAL;
+                break;
+
+            case IN_MULTI_LINE_COMMENT:
+                if (c == '*' && inputFile.peek() == '/') {
+                    inputFile.get();
+                    state = NORMAL;
+                }
+                break;
+        }
+        if (error) break;
+    }
+
+    inputFile.close();
+
+    string result;
+    if (error) {
+        result = "Error: Unbalanced curly braces. Excess '}' found.";
+    } else if (counter != 0) {
+        result = "Error: Unbalanced curly braces. Unclosed '{' count: " + to_string(counter) + ".";
+    } else {
+        result = "All curly braces are balanced.";
+    }
+
+    ofstream outputFile("out.txt");
+    cout << result << endl;
+    if (outputFile.is_open()) {
+        outputFile << result << endl;
+        outputFile.close();
+    } else {
+        cerr << "Unable to open output file." << endl;
+    }
+
+    return 0;
+}
